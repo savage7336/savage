@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Savage AI Chatbot</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          background: url('https://source.unsplash.com/1600x900/?technology,chatbot') no-repeat center center fixed;
+          background-size: cover;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          color: white;
+      }
+      .chat-container {
+          width: 100%;
+          max-width: 600px;
+          background: rgba(0, 0, 0, 0.8);
+          padding: 20px;
+          border-radius: 15px;
+          box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+          display: flex;
+          flex-direction: column;
+      }
+      .chat-box {
+          height: 500px;
+          overflow-y: auto;
+          border-radius: 10px;
+          padding: 15px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .message {
+          padding: 12px;
+          border-radius: 10px;
+          max-width: 80%;
+          word-wrap: break-word;
+      }
+      .user-message {
+          align-self: flex-end;
+          background: #007bff;
+          color: white;
+      }
+      .ai-message {
+          align-self: flex-start;
+          background: #444;
+          color: white;
+      }
+      .thinking {
+          display: flex;
+          align-items: center;
+      }
+      .dots::after {
+          content: "";
+          display: inline-block;
+          animation: dots 1.5s steps(3, end) infinite;
+      }
+      @keyframes dots {
+          0% { content: "."; }
+          33% { content: ".."; }
+          66% { content: "..."; }
+      }
+      .input-area {
+          display: flex;
+          margin-top: 10px;
+          gap: 10px;
+      }
+      .input-box {
+          flex: 1;
+          padding: 12px;
+          border-radius: 8px;
+          border: none;
+          font-size: 16px;
+          background: #333;
+          color: white;
+      }
+      .send-btn, .upload-btn, .clear-btn {
+          padding: 12px 20px;
+          border: none;
+          color: white;
+          font-size: 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: 0.3s;
+      }
+      .send-btn {
+          background: #ff9800;
+      }
+      .send-btn:hover {
+          background: #e68900;
+      }
+      .upload-btn {
+          background: #4caf50;
+      }
+      .upload-btn:hover {
+          background: #45a049;
+      }
+      .clear-btn {
+          background: #f44336;
+      }
+      .clear-btn:hover {
+          background: #e53935;
+      }
+      ::placeholder {
+          color: #bbb;
+      }
+      footer {
+          margin-top: 20px;
+          text-align: center;
+          font-size: 14px;
+          color: #ccc;
+      }
+      footer a {
+          color: #ff9800;
+          text-decoration: none;
+      }
+      footer a:hover {
+          text-decoration: underline;
+      }
+      .instructions {
+          font-size: 14px;
+          color: #ff9800;
+          margin-bottom: 10px;
+      }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+      <h2 style="text-align: center;">Savage AI Chatbot 🤖</h2>
+      <div class="instructions">Type your message below and hit 'Send'. You can also clear the input field if needed.</div>
+      <div class="chat-box" id="chat-box">
+          <div class="message ai-message"><strong>Savage AI:</strong> Hey! Ask me anything about love, technology, freelancing, food, writing, blockchain, travel, fitness, mental health, artificial intelligence, entrepreneurship, sustainability, or personal finance. 🚀</div>
+      </div>
+      <div class="input-area">
+          <input type="text" id="user-input" class="input-box" placeholder="Type a message...">
+          <button onclick="sendMessage()" class="send-btn">Send</button>
+          <button onclick="clearInput()" class="clear-btn">Clear</button>
+          <input type="file" id="image-upload" accept="image/*" onchange="uploadImage()" hidden>
+          <button onclick="document.getElementById('image-upload').click()" class="upload-btn">Upload Image</button>
+      </div>
+      <footer>
+          <p>Connect with us: <a href="https://twitter.com" target="_blank">Twitter</a> | <a href="https://github.com" target="_blank">GitHub</a></p>
+          <p>Visit my site: <a href="https://example.com" target="_blank">Visit My Chatbot Site</a></p>
+          <p>For more information, contact: +25417691832</p>
+          <p>Facebook: <strong>KP Walker KE</strong></p>
+          <p>&copy; 2025 Savage AI. All rights reserved.</p>
+      </footer>
+  </div>
+
+  <script>
+      const dictionary = {
+          "love": "A profound and caring affection towards someone.",
+          "technology": "The application of scientific knowledge for practical purposes.",
+          "freelancing": "Working independently rather than being employed by a company.",
+          "food": "Any nutritious substance that people or animals eat or drink.",
+          "writing": "The activity or skill of composing text.",
+          "blockchain": "A system in which a record of transactions is maintained across several computers.",
+          "travel": "To make a journey, typically of some length.",
+          "fitness": "The condition of being physically fit and healthy.",
+          "mental health": "A person's condition regarding their psychological and emotional well-being.",
+          "artificial intelligence": "The simulation of human intelligence in machines.",
+          "entrepreneurship": "The process of starting and running a new business.",
+          "sustainability": "The ability to be maintained at a certain rate or level, often in relation to environmental balance.",
+          "personal finance": "The management of individual or family financial activities."
+      };
+
+      const explanations = {
+          "love": {
+              explanation: "Love is a complex emotion that can bring great joy and sometimes pain. It involves deep affection, attachment, and care for someone.",
+              example: "For example, parents often have a profound love for their children, which drives them to protect and nurture them."
+          },
+          "technology": {
+              explanation: "Technology refers to the tools, machines, and systems that are developed to solve problems and improve human life.",
+              example: "For instance, smartphones are a technological advancement that allows us to communicate and access information instantly."
+          },
+          "freelancing": {
+              explanation: "Freelancing is a work arrangement where individuals offer their services to clients without being tied to a single employer.",
+              example: "A graphic designer might freelance by taking on projects from various clients instead of working for one company."
+          },
+          "food": {
+              explanation: "Food is any substance consumed to provide nutritional support for the body.",
+              example: "Fruits, vegetables, grains, and proteins are all types of food essential for health."
+          },
+          "writing": {
+              explanation: "Writing is the process of using symbols, such as letters and punctuation, to communicate thoughts and ideas.",
+              example: "An author writing a novel is an example of creative writing that tells a story."
+          },
+          "blockchain": {
+              explanation: "Blockchain is a decentralized digital ledger that records transactions across many computers so that the record cannot be altered retroactively.",
+              example: "Cryptocurrencies like Bitcoin use blockchain technology to ensure secure and transparent transactions."
+          },
+          "travel": {
+              explanation: "Travel involves moving from one place to another, often for leisure, business, or exploration purposes.",
+              example: "Many people travel to different countries to experience new cultures and cuisines."
+          },
+          "fitness": {
+              explanation: "Fitness refers to the state of being physically healthy and strong, often achieved through exercise and proper nutrition.",
+              example: "Regular workouts, such as running or weightlifting, are common ways to maintain fitness."
+          },
+          "mental health": {
+              explanation: "Mental health encompasses emotional, psychological, and social well-being, affecting how we think, feel, and act.",
+              example: "For instance, practices like mindfulness and therapy can improve mental health and well-being."
+          },
+          "artificial intelligence": {
+              explanation: "Artificial intelligence (AI) is the capability of a machine to imitate intelligent human behavior.",
+              example: "Examples of AI include virtual assistants like Siri and chatbots that can engage in conversation."
+          },
+          "entrepreneurship": {
+              explanation: "Entrepreneurship involves the creation and management of a new business venture to make a profit.",
+              example: "A startup founder developing a new app to solve a specific problem is an example of entrepreneurship."
+          },
+          "sustainability": {
+              explanation: "Sustainability is about meeting our own needs without compromising the ability of future generations to meet theirs.",
+              example: "Using renewable energy sources, like solar power, is a sustainable practice that helps protect the environment."
+          },
+          "personal finance": {
+              explanation: "Personal finance involves managing your money, including budgeting, saving, investing, and planning for future expenses.",
+              example: "Creating a monthly budget to track income and expenses is an essential aspect of personal finance."
+          }
+      };
+
+      let firstMessage = true;
+
+      function sendMessage() {
+          let userInput = document.getElementById("user-input").value.trim().toLowerCase();
+          let chatBox = document.getElementById("chat-box");
+          if (userInput === "") return;
+          
+          let userMessage = document.createElement("div");
+          userMessage.classList.add("message", "user-message");
+          userMessage.innerHTML = `<strong>You:</strong> ${userInput}`;
+          chatBox.appendChild(userMessage);
+          chatBox.scrollTop = chatBox.scrollHeight;
+          
+          if (!firstMessage) {
+              setTimeout(() => {
+                  let thinkingMessage = document.createElement("div");
+                  thinkingMessage.classList.add("message", "ai-message", "thinking");
+                  thinkingMessage.innerHTML = `<strong>Savage AI:</strong> <span class="dots"></span> Thinking...`;
+                  chatBox.appendChild(thinkingMessage);
+                  chatBox.scrollTop = chatBox.scrollHeight;
+                  
+                  setTimeout(() => {
+                      chatBox.removeChild(thinkingMessage);
+                      addAIResponse(userInput);
+                  }, 1500);
+              }, 500);
+          } else {
+              setTimeout(() => addAIResponse(userInput), 500);
+          }
+          
+          firstMessage = false;
+          document.getElementById("user-input").value = "";
+      }
+
+      function clearInput() {
+          document.getElementById("user-input").value = "";
+      }
+      
+      function addAIResponse(userInput) {
+          let chatBox = document.getElementById("chat-box");
+          let aiMessage = document.createElement("div");
+          aiMessage.classList.add("message", "ai-message");
+
+          let response;
+          
+          if (userInput in dictionary) {
+              const { explanation, example } = explanations[userInput];
+              response = `<strong>Savage AI:</strong> ${dictionary[userInput]} <br><em>Explanation:</em> ${explanation} <br><em>Example:</em> ${example}`;
+          } else if (userInput.includes("love")) {
+              response = "Love is a complex emotion that can bring great joy and sometimes pain. It's important to communicate openly with your partner.";
+          } else if (userInput.includes("technology")) {
+              response = "Technology is constantly evolving, impacting our lives in numerous ways. What specific area of technology interests you?";
+          } else if (userInput.includes("freelancing")) {
+              response = "Freelancing offers flexibility and independence. It's crucial to manage your time well and maintain a steady flow of clients.";
+          } else if (userInput.includes("food")) {
+              response = "Food brings people together. What type of cuisine do you enjoy the most?";
+          } else if (userInput.includes("writing")) {
+              response = "Writing is a powerful form of expression. What genre do you prefer?";
+          } else if (userInput.includes("blockchain")) {
+              response = "Blockchain technology enables secure and transparent transactions. Are you interested in cryptocurrencies or smart contracts?";
+          } else if (userInput.includes("travel")) {
+              response = "Traveling opens up a world of experiences. What destination is on your bucket list?";
+          } else if (userInput.includes("fitness")) {
+              response = "Fitness is vital for a healthy lifestyle. What type of workouts do you enjoy?";
+          } else if (userInput.includes("mental health")) {
+              response = "Mental health is crucial for overall well-being. Are you looking for tips on managing stress or anxiety?";
+          } else if (userInput.includes("artificial intelligence")) {
+              response = "AI is transforming various industries. What aspect of AI interests you the most?";
+          } else if (userInput.includes("entrepreneurship")) {
+              response = "Entrepreneurship can be challenging yet rewarding. What business idea are you considering?";
+          } else if (userInput.includes("sustainability")) {
+              response = "Sustainability is vital for our planet's future. Are you interested in eco-friendly practices?";
+          } else if (userInput.includes("personal finance")) {
+              response = "Managing personal finances is essential for financial stability. Do you need tips on budgeting or saving?";
+          } else {
+              response = "I'm here to help! Please ask about love, technology, freelancing, food, writing, blockchain, travel, fitness, mental health, artificial intelligence, entrepreneurship, sustainability, or personal finance.";
+          }
+
+          aiMessage.innerHTML = response;
+          chatBox.appendChild(aiMessage);
+          chatBox.scrollTop = chatBox.scrollHeight;
+      }
+  </script>
+</body>
+</html>
